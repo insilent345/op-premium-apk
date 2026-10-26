@@ -1,0 +1,144 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'abnormaleditz80@gmail.com' ||
+        request.auth.token.email == 'insilent345@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Test collection for initial connectivity check
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Apps collection
+    match /apps/{appId} {
+      allow get: if isValidId(appId) && (existing().isPublished == true || isAdmin());
+      allow list: if isAdmin() || resource.data.isPublished == true;
+      allow create, delete: if isValidId(appId) && isAdmin();
+      allow update: if isValidId(appId) && (
+        isAdmin() ||
+        (isSignedIn() && incoming().diff(existing()).affectedKeys().hasOnly(['downloadCount']) && incoming().downloadCount == existing().downloadCount + 1)
+      );
+    }
+
+    // Categories
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isValidId(categoryId) && isAdmin();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isSignedIn() && request.auth.uid == userId && incoming().role == 'user';
+      allow update: if isValidId(userId) && isSignedIn() && (
+        isAdmin() ||
+        (request.auth.uid == userId && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt']) && incoming().role == existing().role)
+      );
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // Payment Requests (Manual bKash & Nagad Send Money)
+    match /paymentRequests/{requestId} {
+      allow get: if isValidId(requestId) && isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isValidId(requestId) && isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().status == 'pending' &&
+        incoming().trxId is string && incoming().trxId.size() <= 50 &&
+        incoming().senderNumber is string && incoming().senderNumber.size() <= 20;
+      allow update: if isValidId(requestId) && isAdmin();
+      allow delete: if isValidId(requestId) && isAdmin();
+    }
+
+    // Purchases / Verified Entitlements
+    match /purchases/{purchaseId} {
+      allow get: if isValidId(purchaseId) && isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isValidId(purchaseId) && isAdmin();
+    }
+
+    // Download History
+    match /downloadHistory/{downloadId} {
+      allow get: if isValidId(downloadId) && isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isValidId(downloadId) && isSignedIn() && incoming().userId == request.auth.uid;
+      allow update, delete: if isValidId(downloadId) && isAdmin();
+    }
+
+    // Favorites
+    match /favorites/{favoriteId} {
+      allow get: if isValidId(favoriteId) && isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isValidId(favoriteId) && isSignedIn() && incoming().userId == request.auth.uid;
+      allow delete: if isValidId(favoriteId) && isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+      allow update: if isValidId(favoriteId) && isAdmin();
+    }
+
+    // Reviews
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId) && (existing().isApproved == true || (isSignedIn() && (existing().userId == request.auth.uid || isAdmin())));
+      allow list: if resource.data.isApproved == true || (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()));
+      allow create: if isValidId(reviewId) && isSignedIn() && incoming().userId == request.auth.uid && incoming().rating >= 1 && incoming().rating <= 5;
+      allow update: if isValidId(reviewId) && (isAdmin() || (isSignedIn() && existing().userId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'comment'])));
+      allow delete: if isValidId(reviewId) && (isAdmin() || (isSignedIn() && existing().userId == request.auth.uid));
+    }
+
+    // Site Settings (bKash & Nagad phone numbers, contact info)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isValidId(settingId) && isAdmin();
+    }
+
+    // Promotional Banners
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isValidId(bannerId) && isAdmin();
+    }
+
+    // Ads (Adsterra)
+    match /ads/{adId} {
+      allow read: if true;
+      allow write: if isValidId(adId) && isAdmin();
+    }
+
+    // Admin Notifications
+    match /notifications/{notificationId} {
+      allow read, write: if isValidId(notificationId) && isAdmin();
+    }
+
+    // Admins registry
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isValidId(adminId) && isAdmin();
+    }
+  }
+}

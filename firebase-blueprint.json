@@ -1,0 +1,251 @@
+{
+  "entities": {
+    "App": {
+      "title": "App",
+      "description": "Android APK application record available for download or purchase",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "slug": { "type": "string", "maxLength": 100 },
+        "icon": { "type": "string", "maxLength": 1000 },
+        "description": { "type": "string", "maxLength": 10000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "version": { "type": "string", "maxLength": 30 },
+        "fileSize": { "type": "string", "maxLength": 30 },
+        "screenshots": { "type": "array" },
+        "apkUrl": { "type": "string", "maxLength": 1500 },
+        "whatsNew": { "type": "string", "maxLength": 2000 },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "releaseDate": { "type": "string", "maxLength": 30 },
+        "isPaid": { "type": "boolean" },
+        "priceBDT": { "type": "number" },
+        "isFeatured": { "type": "boolean" },
+        "isPopular": { "type": "boolean" },
+        "isLatest": { "type": "boolean" },
+        "isTopRated": { "type": "boolean" },
+        "isPublished": { "type": "boolean" },
+        "downloadCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "slug", "category", "version", "isPaid", "priceBDT", "isPublished"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "App category grouping",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 60 },
+        "nameBn": { "type": "string", "maxLength": 60 },
+        "icon": { "type": "string", "maxLength": 60 },
+        "sortOrder": { "type": "number" }
+      },
+      "required": ["name", "nameBn"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile with role and state",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 120 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 1000 },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "isDisabled": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "PaymentRequest": {
+      "title": "PaymentRequest",
+      "description": "Manual Send Money payment request submitted by user via bKash or Nagad",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "userEmail": { "type": "string", "maxLength": 120 },
+        "appId": { "type": "string", "maxLength": 128 },
+        "appName": { "type": "string", "maxLength": 100 },
+        "appPriceBDT": { "type": "number" },
+        "method": { "type": "string", "enum": ["bkash", "nagad"] },
+        "senderNumber": { "type": "string", "maxLength": 20 },
+        "trxId": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "notes": { "type": "string", "maxLength": 500 },
+        "adminComment": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "reviewedBy": { "type": "string", "maxLength": 120 },
+        "reviewedAt": { "type": "string" }
+      },
+      "required": ["userId", "appId", "method", "senderNumber", "trxId", "status", "appPriceBDT"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "Entitlement record granted to user after admin verifies payment",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "userEmail": { "type": "string", "maxLength": 120 },
+        "appId": { "type": "string", "maxLength": 128 },
+        "appName": { "type": "string", "maxLength": 100 },
+        "paymentRequestId": { "type": "string", "maxLength": 128 },
+        "grantedAt": { "type": "string" }
+      },
+      "required": ["userId", "appId", "paymentRequestId", "grantedAt"]
+    },
+    "DownloadHistory": {
+      "title": "DownloadHistory",
+      "description": "Log of downloads performed by an authenticated user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "appId": { "type": "string", "maxLength": 128 },
+        "appName": { "type": "string", "maxLength": 100 },
+        "appVersion": { "type": "string", "maxLength": 30 },
+        "isPaid": { "type": "boolean" },
+        "downloadedAt": { "type": "string" }
+      },
+      "required": ["userId", "appId", "appName", "downloadedAt"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "App bookmarked by user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "appId": { "type": "string", "maxLength": 128 },
+        "appName": { "type": "string", "maxLength": 100 },
+        "appIcon": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "appId"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "User review and star rating for an app",
+      "type": "object",
+      "properties": {
+        "appId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userPhoto": { "type": "string", "maxLength": 1000 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "isApproved": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["appId", "userId", "userName", "rating", "comment"]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global website configuration including bKash and Nagad recipient numbers",
+      "type": "object",
+      "properties": {
+        "siteName": { "type": "string", "maxLength": 100 },
+        "tagline": { "type": "string", "maxLength": 150 },
+        "bkashNumber": { "type": "string", "maxLength": 20 },
+        "nagadNumber": { "type": "string", "maxLength": 20 },
+        "contactEmail": { "type": "string", "maxLength": 100 },
+        "contactPhone": { "type": "string", "maxLength": 30 },
+        "contactWhatsapp": { "type": "string", "maxLength": 30 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["bkashNumber", "nagadNumber"]
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Promotional homepage banner",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 100 },
+        "subtitle": { "type": "string", "maxLength": 200 },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "targetUrl": { "type": "string", "maxLength": 500 },
+        "active": { "type": "boolean" },
+        "sortOrder": { "type": "number" }
+      },
+      "required": ["title", "imageUrl", "active"]
+    },
+    "Ad": {
+      "title": "Ad",
+      "description": "Adsterra advertisement configuration and script tags",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["banner", "native_banner", "social_bar", "popunder", "direct_link"] },
+        "placement": { "type": "string", "enum": ["home", "app_details", "category", "download"] },
+        "title": { "type": "string", "maxLength": 100 },
+        "code": { "type": "string", "maxLength": 5000 },
+        "enabled": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["type", "placement", "title", "enabled"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Admin notifications for pending transactions and orders",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "maxLength": 50 },
+        "title": { "type": "string", "maxLength": 150 },
+        "message": { "type": "string", "maxLength": 500 },
+        "link": { "type": "string", "maxLength": 200 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "message", "read"]
+    }
+  },
+  "firestore": {
+    "/apps/{appId}": {
+      "schema": { "$ref": "#/entities/App" },
+      "description": "App collection containing Android APK metadata"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "App categories collection"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/paymentRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/PaymentRequest" },
+      "description": "bKash and Nagad payment requests"
+    },
+    "/purchases/{purchaseId}": {
+      "schema": { "$ref": "#/entities/Purchase" },
+      "description": "Verified app access entitlements"
+    },
+    "/downloadHistory/{downloadId}": {
+      "schema": { "$ref": "#/entities/DownloadHistory" },
+      "description": "User download logs"
+    },
+    "/favorites/{favoriteId}": {
+      "schema": { "$ref": "#/entities/Favorite" },
+      "description": "User favorite apps"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "App ratings and reviews"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/SiteSettings" },
+      "description": "Global website settings"
+    },
+    "/banners/{bannerId}": {
+      "schema": { "$ref": "#/entities/Banner" },
+      "description": "Homepage promotional banners"
+    },
+    "/ads/{adId}": {
+      "schema": { "$ref": "#/entities/Ad" },
+      "description": "Adsterra ad scripts and configurations"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Administrative notifications"
+    }
+  }
+}

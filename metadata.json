@@ -1,0 +1,6 @@
+{
+  "name": "Premium APK - Apps • Games • Premium APKs",
+  "description": "Mobile-first Android APK distribution platform with manual bKash & Nagad Send Money verification, user accounts, and admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
